@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutorías - Sistema de Gestión</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .card-columns {
+            column-count: 1;
+            column-gap: 1.25rem;
+            orphans: 1;
+            widows: 1;
+        }
+        @media (min-width: 576px) {
+            .card-columns { column-count: 2; }
+        }
+        @media (min-width: 768px) {
+            .card-columns { column-count: 3; }
+        }
+        @media (min-width: 992px) {
+            .card-columns { column-count: 4; }
+        }
+        .card {
+            display: inline-block;
+            width: 100%;
+            margin-bottom: 1.25rem;
+            break-inside: avoid;
+        }
+        .card-img-top {
+            height: 200px;
+            object-fit: cover;
+        }
+        .horario-chip {
+            display: inline-block;
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 0.25rem 0.5rem;
+            margin: 0.125rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .horarios-container {
+            max-height: 60px;
+            overflow: hidden;
+            position: relative;
+        }
+        .horarios-container.expanded {
+            max-height: none;
+        }
+        .expand-btn {
+            font-size: 0.75rem;
+            padding: 0.125rem 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block bg-dark min-vh-100">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">
+                            <i class="fas fa-graduation-cap"></i> Gestión Académica
+                        </h4>
+                    </div>
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="/usuarios">
+                                <i class="fas fa-users"></i> Usuarios
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="/proyectos">
+                                <i class="fas fa-project-diagram"></i> Proyectos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="/proyectos/gestion">
+                                <i class="fas fa-cogs"></i> Gestión de Proyectos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light bg-secondary rounded active" href="/tutorias">
+                                <i class="fas fa-chalkboard-teacher"></i> Tutorías
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-light" href="/tutorias/gestion">
+                                <i class="fas fa-cogs"></i> Gestión de Tutorías
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 bg-light min-vh-100">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Tutorías</h1>
+                    <a href="/tutorias/gestion" class="btn btn-outline-primary">
+                        <i class="fas fa-cogs"></i> Gestionar Tutorías
+                    </a>
+                </div>
+
+                <!-- Search and Filter -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" id="searchInput" placeholder="Buscar tutorías...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="temaFilter">
+                            <option value="">Todos los temas</option>
+                            <option th:each="tutoria : ${tutorias}" th:value="${tutoria.tema}" th:text="${tutoria.tema}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="creadorFilter">
+                            <option value="">Todos los creadores</option>
+                            <option th:each="tutoria : ${tutorias}" th:value="${tutoria.creadoPor.nombre}" th:text="${tutoria.creadoPor.nombre}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Alerts -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Tutorías Cards -->
+                <div class="card-columns" id="tutoriasContainer">
+                    <div class="card shadow-sm tutoria-card" th:each="tutoria : ${tutorias}" 
+                         th:data-titulo="${#strings.toLowerCase(tutoria.titulo)}"
+                         th:data-tema="${#strings.toLowerCase(tutoria.tema)}"
+                         th:data-creador="${#strings.toLowerCase(tutoria.creadoPor.nombre)}">
+                        <div th:if="${tutoria.imagen != null and !tutoria.imagen.isEmpty()}">
+                            <img th:src="${tutoria.imagen}" class="card-img-top" alt="Imagen de la tutoría">
+                        </div>
+                        <div th:if="${tutoria.imagen == null or tutoria.imagen.isEmpty()}" class="bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-chalkboard-teacher fa-3x text-muted"></i>
+                        </div>
+                        
+                        <div class="card-body">
+                            <h5 class="card-title" th:text="${tutoria.titulo}">Título de la Tutoría</h5>
+                            <div class="mb-2">
+                                <span class="badge bg-primary" th:text="${tutoria.tema}">Tema</span>
+                            </div>
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-user"></i> <span th:text="${tutoria.creadoPor.nombre}">Creador</span>
+                                </small>
+                            </div>
+                            
+                            <!-- Horarios as chips -->
+                            <div class="horarios-container mb-2" th:if="${tutoria.horario != null and !tutoria.horario.isEmpty()}">
+                                <div class="d-flex align-items-center">
+                                    <small class="text-muted me-2"><i class="fas fa-clock"></i> Horarios:</small>
+                                    <button class="btn btn-link expand-btn p-0" onclick="toggleHorarios(this)">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </button>
+                                </div>
+                                <div class="horarios-chips">
+                                    <span th:each="horario : ${#strings.arraySplit(tutoria.horario, ', ')}" 
+                                          class="horario-chip" th:text="${horario}">Horario</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <div class="btn-group w-100" role="group">
+                                <button class="btn btn-success btn-sm" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#inscribirModal"
+                                        th:data-tutoria-id="${tutoria.idTutoria}"
+                                        th:data-tutoria-titulo="${tutoria.titulo}">
+                                    <i class="fas fa-user-plus"></i> Inscribir
+                                </button>
+                                <button class="btn btn-info btn-sm" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#asistentesModal"
+                                        th:data-tutoria-id="${tutoria.idTutoria}"
+                                        th:data-tutoria-titulo="${tutoria.titulo}">
+                                    <i class="fas fa-users"></i> Ver Asistentes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty State -->
+                <div class="text-center mt-5" id="emptyState" style="display: none;">
+                    <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No se encontraron tutorías</h4>
+                    <p class="text-muted">Intenta con otros términos de búsqueda</p>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Inscribir Usuario Modal -->
+    <div class="modal fade" id="inscribirModal" tabindex="-1" aria-labelledby="inscribirModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" th:action="@{/tutorias/inscribir}">
+                    <input type="hidden" name="tutoriaId" id="inscribirTutoriaId" />
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="inscribirModalLabel">Inscribir Usuario</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Inscribir usuario en la tutoría: <span id="inscribirTutoriaTitulo" class="fw-bold"></span></p>
+                        <div class="mb-3">
+                            <label for="inscribirUsuarioId" class="form-label">Usuario</label>
+                            <select class="form-select" id="inscribirUsuarioId" name="usuarioId" required>
+                                <option value="">Seleccionar usuario...</option>
+                                <option th:each="usuario : ${usuarios}" 
+                                        th:value="${usuario.idUsuario}" 
+                                        th:text="${usuario.nombre}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Inscribir</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Asistentes Modal -->
+    <div class="modal fade" id="asistentesModal" tabindex="-1" aria-labelledby="asistentesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="asistentesModalLabel">Asistentes de la Tutoría</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="asistentesContent">
+                        <!-- Content will be loaded via JavaScript -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('input', function() {
+            filterTutorias();
+        });
+
+        document.getElementById('temaFilter').addEventListener('change', function() {
+            filterTutorias();
+        });
+
+        document.getElementById('creadorFilter').addEventListener('change', function() {
+            filterTutorias();
+        });
+
+        function filterTutorias() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const temaFilter = document.getElementById('temaFilter').value.toLowerCase();
+            const creadorFilter = document.getElementById('creadorFilter').value.toLowerCase();
+            const tutorias = document.querySelectorAll('.tutoria-card');
+            let visibleCount = 0;
+
+            tutorias.forEach(tutoria => {
+                const titulo = tutoria.getAttribute('data-titulo');
+                const tema = tutoria.getAttribute('data-tema');
+                const creador = tutoria.getAttribute('data-creador');
+                
+                const matchesSearch = titulo.includes(searchTerm) || tema.includes(searchTerm);
+                const matchesTema = !temaFilter || tema === temaFilter;
+                const matchesCreador = !creadorFilter || creador === creadorFilter;
+                
+                if (matchesSearch && matchesTema && matchesCreador) {
+                    tutoria.style.display = 'inline-block';
+                    visibleCount++;
+                } else {
+                    tutoria.style.display = 'none';
+                }
+            });
+
+            // Show/hide empty state
+            const emptyState = document.getElementById('emptyState');
+            if (visibleCount === 0) {
+                emptyState.style.display = 'block';
+            } else {
+                emptyState.style.display = 'none';
+            }
+        }
+
+        function toggleHorarios(button) {
+            const container = button.closest('.horarios-container');
+            const icon = button.querySelector('i');
+            
+            if (container.classList.contains('expanded')) {
+                container.classList.remove('expanded');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                container.classList.add('expanded');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            }
+        }
+
+        // Inscribir modal
+        document.getElementById('inscribirModal').addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const tutoriaId = button.getAttribute('data-tutoria-id');
+            const tutoriaTitulo = button.getAttribute('data-tutoria-titulo');
+            document.getElementById('inscribirTutoriaId').value = tutoriaId;
+            document.getElementById('inscribirTutoriaTitulo').textContent = tutoriaTitulo;
+        });
+
+        // Asistentes modal
+        document.getElementById('asistentesModal').addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const tutoriaId = button.getAttribute('data-tutoria-id');
+            const tutoriaTitulo = button.getAttribute('data-tutoria-titulo');
+            
+            document.getElementById('asistentesModalLabel').textContent = 'Asistentes de: ' + tutoriaTitulo;
+            
+            // Load assistants via AJAX
+            fetch(`/tutorias/${tutoriaId}/asistentes`)
+                .then(response => response.json())
+                .then(asistentes => {
+                    let content = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Usuario</th><th>Email</th><th>Acciones</th></tr></thead><tbody>';
+                    
+                    if (asistentes.length > 0) {
+                        asistentes.forEach(asistente => {
+                            content += `<tr>
+                                <td>${asistente.usuario.nombre}</td>
+                                <td>${asistente.usuario.email}</td>
+                                <td>
+                                    <form method="post" action="/tutorias/desinscribir" style="display: inline;">
+                                        <input type="hidden" name="tutoriaId" value="${tutoriaId}">
+                                        <input type="hidden" name="usuarioId" value="${asistente.usuario.idUsuario}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-user-minus"></i> Desinscribir
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>`;
+                        });
+                    } else {
+                        content += '<tr><td colspan="3" class="text-center">No hay asistentes inscritos</td></tr>';
+                    }
+                    
+                    content += '</tbody></table></div>';
+                    document.getElementById('asistentesContent').innerHTML = content;
+                })
+                .catch(error => {
+                    document.getElementById('asistentesContent').innerHTML = '<div class="alert alert-danger">Error al cargar los asistentes</div>';
+                });
+        });
+
+        // Reset modal on close
+        document.getElementById('inscribirModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('inscribirUsuarioId').value = '';
+        });
+
+        // Remove duplicates from filters
+        function removeDuplicatesFromSelect(selectId) {
+            const select = document.getElementById(selectId);
+            const options = Array.from(select.options);
+            const uniqueValues = [...new Set(options.map(opt => opt.value))];
+            const firstOption = options[0].textContent;
+            
+            // Clear and rebuild options
+            select.innerHTML = `<option value="">${firstOption}</option>`;
+            uniqueValues.filter(value => value !== '').forEach(value => {
+                const option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                select.appendChild(option);
+            });
+        }
+
+        // Initialize filters without duplicates
+        removeDuplicatesFromSelect('temaFilter');
+        removeDuplicatesFromSelect('creadorFilter');
+    </script>
+</body>
+</html> 
