@@ -25,7 +25,15 @@ public class UsuarioService {
     }
     
     public Optional<Usuario> findByEmail(String email) {
-        return usuarioRepository.findByEmail(email);
+        try {
+            if (email == null || email.trim().isEmpty()) {
+                return Optional.empty();
+            }
+            return usuarioRepository.findByEmail(email.trim().toLowerCase());
+        } catch (Exception e) {
+            System.err.println("Error finding user by email: " + e.getMessage());
+            throw e;
+        }
     }
     
     public boolean existsByEmail(String email) {
@@ -46,9 +54,8 @@ public class UsuarioService {
             Usuario usuario = optionalUsuario.get();
             usuario.setNombre(usuarioDetails.getNombre());
             usuario.setEmail(usuarioDetails.getEmail());
-            if (usuarioDetails.getPassword() != null && !usuarioDetails.getPassword().isEmpty()) {
-                usuario.setPassword(usuarioDetails.getPassword());
-            }
+            // Password is not updated from the management interface
+            // Only updated during registration or through dedicated password change
             return usuarioRepository.save(usuario);
         }
         return null;

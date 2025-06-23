@@ -71,7 +71,7 @@ public class TutoriaService {
     }
     
     // Methods for managing assistants
-    public TutoriaAsistente inscribirAsistente(Long tutoriaId, Long usuarioId) {
+    public TutoriaAsistente inscribirAsistente(Long tutoriaId, Long usuarioId, String horarioSeleccionado) {
         Optional<Tutoria> tutoriaOpt = tutoriaRepository.findById(tutoriaId);
         Optional<Usuario> usuarioOpt = usuarioRepository.findById(usuarioId);
         
@@ -84,10 +84,16 @@ public class TutoriaService {
                 TutoriaAsistente asistente = new TutoriaAsistente();
                 asistente.setTutoria(tutoria);
                 asistente.setUsuario(usuario);
+                asistente.setHorarioSeleccionado(horarioSeleccionado);
                 return tutoriaAsistenteRepository.save(asistente);
             }
         }
         return null;
+    }
+    
+    // Keep the old method for backward compatibility
+    public TutoriaAsistente inscribirAsistente(Long tutoriaId, Long usuarioId) {
+        return inscribirAsistente(tutoriaId, usuarioId, null);
     }
     
     public void desinscribirAsistente(Long tutoriaId, Long usuarioId) {

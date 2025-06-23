@@ -92,16 +92,18 @@ public class TutoriaController {
     }
     
     @PostMapping("/inscribir")
-    public String inscribirAsistente(@RequestParam Long tutoriaId, @RequestParam Long usuarioId, RedirectAttributes redirectAttributes) {
+    public String inscribirAsistente(@RequestParam Long tutoriaId, @RequestParam Long usuarioId, 
+                                   @RequestParam(required = false) String horarioSeleccionado, 
+                                   RedirectAttributes redirectAttributes) {
         try {
-            TutoriaAsistente asistente = tutoriaService.inscribirAsistente(tutoriaId, usuarioId);
+            TutoriaAsistente asistente = tutoriaService.inscribirAsistente(tutoriaId, usuarioId, horarioSeleccionado);
             if (asistente != null) {
-                redirectAttributes.addFlashAttribute("success", "Usuario inscrito exitosamente");
+                redirectAttributes.addFlashAttribute("success", "Te has inscrito exitosamente a la tutoría");
             } else {
-                redirectAttributes.addFlashAttribute("error", "El usuario ya está inscrito o no se encontró la tutoría/usuario");
+                redirectAttributes.addFlashAttribute("error", "Ya estás inscrito en esta tutoría o no se encontró la tutoría/usuario");
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error al inscribir usuario: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Error al inscribirse: " + e.getMessage());
         }
         return "redirect:/tutorias";
     }

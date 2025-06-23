@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="fragments :: head('Dashboard')">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <th:block th:replace="fragments :: sidebar('dashboard')"></th:block>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 bg-light min-vh-100">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">Dashboard</h1>
+                    <div class="text-muted">
+                        <i class="fas fa-calendar"></i> <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy')}">Fecha</span>
+                    </div>
+                </div>
+
+                <!-- Welcome Section -->
+                <div class="alert alert-primary" role="alert">
+                    <h4 class="alert-heading">
+                        <i class="fas fa-hand-wave"></i> ¡Bienvenido, <span th:text="${usuario.nombre}">Usuario</span>!
+                    </h4>
+                    <p>Este es tu panel de control del Sistema de Gestión Académica. Desde aquí puedes acceder a todas las funcionalidades.</p>
+                </div>
+
+                <!-- Quick Actions Cards -->
+                <div class="row mb-4">
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-project-diagram fa-3x text-primary"></i>
+                                </div>
+                                <h5 class="card-title">Proyectos</h5>
+                                <p class="card-text text-muted">Explora proyectos académicos</p>
+                                <a href="/proyectos" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> Ver Proyectos
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-chalkboard-teacher fa-3x text-success"></i>
+                                </div>
+                                <h5 class="card-title">Tutorías</h5>
+                                <p class="card-text text-muted">Únete a sesiones de tutoría</p>
+                                <a href="/tutorias" class="btn btn-success">
+                                    <i class="fas fa-eye"></i> Ver Tutorías
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-cogs fa-3x text-warning"></i>
+                                </div>
+                                <h5 class="card-title">Gestión</h5>
+                                <p class="card-text text-muted">Administra el sistema</p>
+                                <a href="/usuarios" class="btn btn-warning">
+                                    <i class="fas fa-users"></i> Gestionar
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3 mb-3">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <div class="mb-3">
+                                    <i class="fas fa-user-circle fa-3x text-info"></i>
+                                </div>
+                                <h5 class="card-title">Mi Perfil</h5>
+                                <p class="card-text text-muted">Información personal</p>
+                                <button class="btn btn-info" disabled>
+                                    <i class="fas fa-user-edit"></i> Próximamente
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity Section -->
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-chart-line"></i> Actividad Reciente
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1">
+                                        <p class="mb-0">Sistema funcionando correctamente</p>
+                                        <small class="text-muted">Todas las funcionalidades están disponibles</small>
+                                    </div>
+                                    <div class="text-success">
+                                        <i class="fas fa-check-circle fa-2x"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-info-circle"></i> Estado del Sistema
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Proyectos</span>
+                                    <span class="badge bg-primary">Activo</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Tutorías</span>
+                                    <span class="badge bg-success">Activo</span>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Firebase</span>
+                                    <span class="badge bg-info">Conectado</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <th:block th:replace="fragments :: scripts"></th:block>
+</body>
+</html> 
